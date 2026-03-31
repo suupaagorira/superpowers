@@ -26,7 +26,7 @@ Thanks!
 
 ## Installation
 
-**Note:** Installation differs by platform. Claude Code or Cursor have built-in plugin marketplaces. Codex and OpenCode require manual setup.
+**Note:** Installation differs by platform. Claude Code or Cursor have built-in plugin marketplaces. Codex, OpenCode, GitHub Copilot CLI, and Gemini CLI require manual setup.
 
 ### Claude Code Official Marketplace
 
@@ -81,6 +81,20 @@ Fetch and follow instructions from https://raw.githubusercontent.com/obra/superp
 ```
 
 **Detailed docs:** [docs/README.opencode.md](docs/README.opencode.md)
+
+### GitHub Copilot CLI
+
+Tell Copilot CLI:
+
+```bash
+copilot plugin install <this-repository>
+```
+
+For a local clone, run `copilot plugin install .` from the repository root.
+
+**Install guide:** [.copilot/INSTALL.md](.copilot/INSTALL.md)
+
+**Detailed docs:** [docs/README.copilot.md](docs/README.copilot.md)
 
 ### Gemini CLI
 
