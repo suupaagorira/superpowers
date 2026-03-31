@@ -32,14 +32,21 @@ Task tool (general-purpose):
     1. Implement exactly what the task specifies
     2. Write tests (following TDD if task says to)
     3. Verify implementation works
-    4. Commit your work
-    5. Self-review (see below)
-    6. Report back
+    4. Update the local branch note when it materially helps preserve context
+    5. When the task is review-ready, create a local checkpoint commit on the current `wip/*` branch
+    6. Self-review (see below)
+    7. Report back
 
     Work from: [directory]
 
     **While you work:** If you encounter something unexpected or unclear, **ask questions**.
     It's always OK to pause and clarify. Don't guess or make assumptions.
+
+    **Git discipline:**
+    - Treat `wip/*` as a local working branch
+    - Never push from this prompt
+    - Use Japanese checkpoint commit messages
+    - If you're not on a local `wip/*` branch and the task expects one, stop and report NEEDS_CONTEXT
 
     ## Code Organization
 
@@ -97,6 +104,14 @@ Task tool (general-purpose):
 
     If you find issues during self-review, fix them now before reporting.
 
+    ## Branch Note
+
+    The local branch note is there to preserve context and final reporting material.
+
+    - Update it when your implementation changes the plan, trade-offs, changed files, test results, or unresolved issues
+    - Keep it concise; overwrite stale summaries when that improves clarity
+    - Before you create the checkpoint commit, make sure the note's `最終報告用要約` and `確認結果` are current
+
     ## Report Format
 
     When done, report:
@@ -104,6 +119,8 @@ Task tool (general-purpose):
     - What you implemented (or what you attempted, if blocked)
     - What you tested and test results
     - Files changed
+    - Branch note updates (if any)
+    - Checkpoint commit message
     - Self-review findings (if any)
     - Any issues or concerns
 

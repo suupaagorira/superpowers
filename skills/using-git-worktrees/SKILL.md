@@ -13,6 +13,39 @@ Git worktrees create isolated workspaces sharing the same repository, allowing w
 
 **Announce at start:** "I'm using the using-git-worktrees skill to set up an isolated workspace."
 
+## Branch Rules
+
+This skill prepares a local working branch, not a public PR branch.
+
+- **Protected branches:** `main`, `master`, `develop`, `release/*`
+- **Never** start implementation directly on a protected branch
+- Default working branch format: `wip/<ticket>　<short-summary>`
+- If the platform or tooling rejects the Japanese branch name, fall back to an ASCII slug automatically
+
+### Branch Note
+
+Initialize one tracked note file per working branch:
+
+```text
+.ai-notes/wip_<ticket>　<short-summary>.md
+```
+
+Use this file to preserve context and final reporting material. The note should contain these headings:
+
+```markdown
+# 作業メモ
+
+## 目的・依頼内容
+## 実施方針
+## 判断理由
+## 変更内容
+## 変更ファイル
+## 確認結果
+## 見送り事項
+## 未解決事項
+## 最終報告用要約
+```
+
 ## Directory Selection Process
 
 Follow this priority order:
@@ -80,7 +113,15 @@ No .gitignore verification needed - outside project entirely.
 project=$(basename "$(git rev-parse --show-toplevel)")
 ```
 
-### 2. Create Worktree
+### 2. Determine Working Branch Name
+
+Choose a local working branch name before creating the worktree.
+
+- Prefer `wip/<ticket>　<short-summary>`
+- If there is no ticket, use a concise summary
+- If Japanese branch names fail on the current platform, fall back to `wip/<ticket>-<ascii-slug>`
+
+### 3. Create Worktree
 
 ```bash
 # Determine full path
@@ -96,9 +137,12 @@ esac
 # Create worktree with new branch
 git worktree add "$path" -b "$BRANCH_NAME"
 cd "$path"
+
+# Initialize branch note
+mkdir -p .ai-notes
 ```
 
-### 3. Run Project Setup
+### 4. Run Project Setup
 
 Auto-detect and run appropriate setup:
 
@@ -117,7 +161,7 @@ if [ -f pyproject.toml ]; then poetry install; fi
 if [ -f go.mod ]; then go mod download; fi
 ```
 
-### 4. Verify Clean Baseline
+### 5. Verify Clean Baseline
 
 Run tests to ensure worktree starts clean:
 
@@ -133,10 +177,12 @@ go test ./...
 
 **If tests pass:** Report ready.
 
-### 5. Report Location
+### 6. Report Location
 
 ```
 Worktree ready at <full-path>
+Working branch: <branch-name>
+Branch note: .ai-notes/<branch-note>.md
 Tests passing (<N> tests, 0 failures)
 Ready to implement <feature-name>
 ```
@@ -149,6 +195,7 @@ Ready to implement <feature-name>
 | `worktrees/` exists | Use it (verify ignored) |
 | Both exist | Use `.worktrees/` |
 | Neither exists | Check CLAUDE.md → Ask user |
+| Protected branch checked out | Create a local `wip/*` branch in the new worktree |
 | Directory not ignored | Add to .gitignore + commit |
 | Tests fail during baseline | Report failures + ask |
 | No package.json/Cargo.toml | Skip dependency install |
@@ -175,6 +222,11 @@ Ready to implement <feature-name>
 - **Problem:** Breaks on projects using different tools
 - **Fix:** Auto-detect from project files (package.json, etc.)
 
+### Reusing public branch names for local work
+
+- **Problem:** Interim commits leak into the branch that will be pushed later
+- **Fix:** Use a local `wip/*` branch first, then prepare a clean `pr/*` branch during finishing
+
 ## Example Workflow
 
 ```
@@ -182,11 +234,14 @@ You: I'm using the using-git-worktrees skill to set up an isolated workspace.
 
 [Check .worktrees/ - exists]
 [Verify ignored - git check-ignore confirms .worktrees/ is ignored]
-[Create worktree: git worktree add .worktrees/auth -b feature/auth]
+[Create worktree: git worktree add .worktrees/auth -b "wip/ABC-123　認証条件整理"]
+[Create .ai-notes/wip_ABC-123　認証条件整理.md]
 [Run npm install]
 [Run npm test - 47 passing]
 
 Worktree ready at /Users/jesse/myproject/.worktrees/auth
+Working branch: wip/ABC-123　認証条件整理
+Branch note: .ai-notes/wip_ABC-123　認証条件整理.md
 Tests passing (47 tests, 0 failures)
 Ready to implement auth feature
 ```
@@ -199,20 +254,24 @@ Ready to implement auth feature
 - Proceed with failing tests without asking
 - Assume directory location when ambiguous
 - Skip CLAUDE.md check
+- Start implementation on a protected branch
+- Skip initializing the branch note when this workflow expects one
 
 **Always:**
 - Follow directory priority: existing > CLAUDE.md > ask
 - Verify directory is ignored for project-local
+- Start from a local `wip/*` branch when public history will be prepared later
+- Initialize the branch note before implementation begins
 - Auto-detect and run project setup
 - Verify clean test baseline
 
 ## Integration
 
 **Called by:**
-- **brainstorming** (Phase 4) - REQUIRED when design is approved and implementation follows
-- **subagent-driven-development** - REQUIRED before executing any tasks
-- **executing-plans** - REQUIRED before executing any tasks
+- **brainstorming** - REQUIRED: Ensures isolated workspace (creates one or verifies existing)
+- **subagent-driven-development** - REQUIRED: Ensures isolated workspace (creates one or verifies existing)
+- **executing-plans** - REQUIRED: Ensures isolated workspace (creates one or verifies existing)
 - Any skill needing isolated workspace
 
 **Pairs with:**
-- **finishing-a-development-branch** - REQUIRED for cleanup after work complete
+- **finishing-a-development-branch** - REQUIRED to convert local `wip/*` work into a clean `pr/*` branch
