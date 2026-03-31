@@ -1,0 +1,23 @@
+{
+  "name": "superpowers",
+  "description": "Core skills library for GitHub Copilot CLI: TDD, debugging, collaboration patterns, and proven techniques",
+  "version": "5.0.6",
+  "author": {
+    "name": "Jesse Vincent",
+    "email": "jesse@fsck.com"
+  },
+  "homepage": "https://github.com/obra/superpowers",
+  "repository": "https://github.com/obra/superpowers",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "agents",
+    "tdd",
+    "debugging",
+    "collaboration",
+    "best-practices",
+    "workflows"
+  ],
+  "skills": "skills/",
+  "agents": "agents/"
+}
